@@ -13,10 +13,9 @@
             "purpose": "any"
         },
         {
-            "src": "favicon.svg",
+            "src": "apple-touch-icon.png",
             "sizes": "512x512",
-            "type": "image/svg+xml",
-            "purpose": "maskable"
+            "type": "image/png"
         }
     ]
 }
