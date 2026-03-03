@@ -1,16 +1,19 @@
 // State Management
 const state = {
     expenses: [],
+    subscriptions: [],
     viewingDate: new Date(),
     github: {
         user: localStorage.getItem('gh-user') || '',
         repo: localStorage.getItem('gh-repo') || '',
         token: localStorage.getItem('gh-token') || '',
-        sha: '' // Keep track of the file SHA for updates
+        sha_expenses: '',
+        sha_subs: ''
     }
 };
 
-const CSV_FILENAME = 'data.csv';
+const EXP_FILENAME = 'data.csv';
+const SUBS_FILENAME = 'subscriptions.csv';
 
 // Selectors
 const monthlyTotalEl = document.getElementById('monthly-total');
@@ -24,7 +27,7 @@ const prevBtn = document.getElementById('prev-period');
 const nextBtn = document.getElementById('next-period');
 const reloadBtn = document.getElementById('reload-btn');
 
-// Settings Selectors
+// Settings & Sub Selectors
 const settingsBtn = document.getElementById('settings-btn');
 const settingsModal = document.getElementById('settings-modal');
 const closeSettingsBtn = document.getElementById('close-settings');
@@ -35,30 +38,48 @@ const ghTokenInp = document.getElementById('gh-token');
 const syncStatus = document.getElementById('sync-status');
 const syncText = document.getElementById('sync-text');
 
+const subListEl = document.getElementById('sub-list');
+const subNameInp = document.getElementById('sub-name');
+const subAmountInp = document.getElementById('sub-amount');
+const subFreqSel = document.getElementById('sub-freq');
+const subDayInp = document.getElementById('sub-day');
+const subMonthInp = document.getElementById('sub-month');
+const addSubBtn = document.getElementById('add-sub-btn');
+
 // Helper: Format Number
 const formatNumber = (num) => new Intl.NumberFormat('ja-JP').format(num);
 
 // Logic: CSV Handling
-const jsonToCsv = (data) => {
-    const header = 'id,date,description,amount\n';
-    const rows = data.map(item => `${item.id},${item.date},"${(item.description || '').replace(/"/g, '""')}",${item.amount}`).join('\n');
-    return header + rows;
+const jsonToCsv = (data, type) => {
+    if (type === 'expenses') {
+        const header = 'id,date,description,amount\n';
+        return header + data.map(item => `${item.id},${item.date},"${(item.description || '').replace(/"/g, '""')}",${item.amount}`).join('\n');
+    } else {
+        const header = 'id,name,amount,frequency,day,month\n';
+        return header + data.map(item => `${item.id},"${item.name.replace(/"/g, '""')}",${item.amount},${item.frequency},${item.day},${item.month || ''}`).join('\n');
+    }
 };
 
-const csvToJson = (csv) => {
+const csvToJson = (csv, type) => {
     const lines = csv.trim().split('\n');
     if (lines.length <= 1) return [];
 
-    // Simple CSV parser
     return lines.slice(1).map(line => {
         const parts = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-        if (!parts || parts.length < 4) return null;
-        return {
-            id: parts[0],
-            date: parts[1],
-            description: parts[2].replace(/^"|"$/g, '').replace(/""/g, '"'),
-            amount: parseFloat(parts[3])
-        };
+        if (!parts) return null;
+        if (type === 'expenses') {
+            return {
+                id: parts[0], date: parts[1],
+                description: parts[2].replace(/^"|"$/g, '').replace(/""/g, '"'),
+                amount: parseFloat(parts[3])
+            };
+        } else {
+            return {
+                id: parts[0], name: parts[1].replace(/^"|"$/g, '').replace(/""/g, '"'),
+                amount: parseFloat(parts[2]), frequency: parts[3],
+                day: parseInt(parts[4]), month: parts[5] ? parseInt(parts[5]) : null
+            };
+        }
     }).filter(x => x !== null);
 };
 
@@ -69,222 +90,211 @@ const showSync = (text) => {
 };
 const hideSync = () => syncStatus.classList.add('hide');
 
-const githubFetch = async () => {
+const githubFetchFile = async (filename) => {
     const { user, repo, token } = state.github;
-    if (!user || !repo || !token) return;
+    const url = `https://api.github.com/repos/${user}/${repo}/contents/${filename}`;
+    const res = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+    if (res.status === 404) return null;
+    const json = await res.json();
+    const content = decodeURIComponent(escape(atob(json.content)));
+    return { sha: json.sha, content: csvToJson(content, filename === EXP_FILENAME ? 'expenses' : 'subs') };
+};
 
-    showSync('取得中...');
+const githubFetchAll = async () => {
+    if (!state.github.token) return;
+    showSync('同期中...');
     try {
-        const url = `https://api.github.com/repos/${user}/${repo}/contents/${CSV_FILENAME}`;
-        const res = await fetch(url, {
-            headers: { 'Authorization': `token ${token}` }
-        });
+        const expData = await githubFetchFile(EXP_FILENAME);
+        if (expData) { state.expenses = expData.content; state.github.sha_expenses = expData.sha; }
 
-        if (res.status === 404) {
-            state.expenses = [];
-            state.github.sha = '';
-            return;
-        }
-
-        const json = await res.json();
-        state.github.sha = json.sha;
-        const csvContent = atob(json.content); // Decode Base64
-        state.expenses = csvToJson(decodeURIComponent(escape(csvContent))); // Handle UTF-8
+        const subData = await githubFetchFile(SUBS_FILENAME);
+        if (subData) { state.subscriptions = subData.content; state.github.sha_subs = subData.sha; }
     } catch (e) {
-        console.error('Fetch failed', e);
-        alert('GitHubからのデータ取得に失敗しました。設定を確認してください。');
+        console.error('Fetch error', e);
     } finally {
         hideSync();
         updateUI();
     }
 };
 
-const githubPush = async () => {
-    const { user, repo, token, sha } = state.github;
-    if (!user || !repo || !token) return;
-
-    showSync('保存中...');
-    try {
-        const url = `https://api.github.com/repos/${user}/${repo}/contents/${CSV_FILENAME}`;
-        const csvContent = jsonToCsv(state.expenses);
-        const encodedContent = btoa(unescape(encodeURIComponent(csvContent))); // Handle UTF-8
-
-        const res = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: `Update ${CSV_FILENAME} via Expense Tracker`,
-                content: encodedContent,
-                sha: sha || undefined
-            })
-        });
-
-        if (!res.ok) throw new Error('Push failed');
-        const json = await res.json();
-        state.github.sha = json.content.sha;
-    } catch (e) {
-        console.error('Push failed', e);
-        alert('GitHubへの保存に失敗しました。');
-    } finally {
-        hideSync();
-    }
+const githubPushFile = async (filename, data, type) => {
+    const { user, repo, token } = state.github;
+    const sha = type === 'expenses' ? state.github.sha_expenses : state.github.sha_subs;
+    const url = `https://api.github.com/repos/${user}/${repo}/contents/${filename}`;
+    const csv = jsonToCsv(data, type);
+    const res = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            message: `Update ${filename}`,
+            content: btoa(unescape(encodeURIComponent(csv))),
+            sha: sha || undefined
+        })
+    });
+    const json = await res.json();
+    if (type === 'expenses') state.github.sha_expenses = json.content.sha;
+    else state.github.sha_subs = json.content.sha;
 };
 
-// Logic: Period Calculation
+// Logic: Period & UI
 const getPeriodInfo = (date) => {
     const d = new Date(date);
     const day = d.getDate();
     let year = d.getFullYear();
     let month = d.getMonth();
-
     if (day <= 10) month -= 1;
-
-    const startOfPeriod = new Date(year, month, 11);
-    const pYear = startOfPeriod.getFullYear();
-    const pMonth = startOfPeriod.getMonth();
-
-    const startDate = new Date(pYear, pMonth, 11);
-    const endDate = new Date(pYear, pMonth + 1, 10, 23, 59, 59);
-
-    return {
-        name: `${pYear}年${pMonth + 1}月度`,
-        start: startDate,
-        end: endDate
-    };
+    const start = new Date(year, month, 11);
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 10, 23, 59, 59);
+    return { name: `${start.getFullYear()}年${start.getMonth() + 1}月度`, start, end };
 };
 
-// Logic: Update UI
 const updateUI = () => {
     const period = getPeriodInfo(state.viewingDate);
     periodNameEl.textContent = period.name;
     periodDatesEl.textContent = `${period.start.getMonth() + 1}/${period.start.getDate()} ~ ${period.end.getMonth() + 1}/${period.end.getDate()}`;
 
+    // Filter Manual Expenses
     const periodExpenses = state.expenses.filter(exp => {
-        const expDate = new Date(exp.date);
-        return expDate >= period.start && expDate <= period.end;
+        const d = new Date(exp.date);
+        return d >= period.start && d <= period.end;
     });
 
-    const total = periodExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-    monthlyTotalEl.textContent = formatNumber(total);
+    // Calculate Subscriptions for this period
+    const activeSubs = state.subscriptions.map(sub => {
+        let isActive = false;
+        if (sub.frequency === 'monthly') isActive = true;
+        else if (sub.frequency === 'yearly') {
+            const periodMonths = [];
+            let curr = new Date(period.start);
+            while (curr <= period.end) {
+                periodMonths.push(curr.getMonth() + 1);
+                curr.setDate(curr.getDate() + 1);
+                if (curr.getDate() === 1) curr.setHours(0, 0, 0, 0);
+            }
+            if (new Set(periodMonths).has(sub.month)) isActive = true;
+        }
+        return isActive ? sub : null;
+    }).filter(x => x !== null);
 
+    const manualTotal = periodExpenses.reduce((s, e) => s + e.amount, 0);
+    const subTotal = activeSubs.reduce((s, e) => s + e.amount, 0);
+    monthlyTotalEl.textContent = formatNumber(manualTotal + subTotal);
+
+    // History: Combine Manual + Subs (UI only)
     historyList.innerHTML = '';
-    periodExpenses.slice().reverse().forEach((exp) => {
+
+    // Add Subs to history display
+    activeSubs.forEach(sub => {
+        const item = document.createElement('li');
+        item.className = 'history-item sub-entry';
+        item.style.borderLeft = '4px solid var(--accent-secondary)';
+        item.innerHTML = `
+            <div class="item-info">
+                <span class="item-desc">🔄 ${sub.name}</span>
+                <span class="item-date">固定費</span>
+            </div>
+            <span class="item-amount">¥${formatNumber(sub.amount)}</span>
+        `;
+        historyList.appendChild(item);
+    });
+
+    periodExpenses.slice().reverse().forEach(exp => {
         const item = document.createElement('li');
         item.className = 'history-item';
-        const dateObj = new Date(exp.date);
+        const d = new Date(exp.date);
         item.innerHTML = `
             <div class="item-info">
                 <span class="item-desc">${exp.description || '出費'}</span>
-                <span class="item-date">${dateObj.getMonth() + 1}/${dateObj.getDate()}</span>
+                <span class="item-date">${d.getMonth() + 1}/${d.getDate()}</span>
             </div>
             <span class="item-amount">¥${formatNumber(exp.amount)}</span>
         `;
         historyList.appendChild(item);
     });
+
+    // Update Sub List in Settings
+    subListEl.innerHTML = '';
+    state.subscriptions.forEach(sub => {
+        const div = document.createElement('div');
+        div.className = 'sub-item';
+        div.innerHTML = `
+            <div class="sub-item-info">
+                <span>${sub.name}</span>
+                <span class="sub-item-meta">¥${formatNumber(sub.amount)} / ${sub.frequency === 'monthly' ? '月' : sub.month + '月'}</span>
+            </div>
+            <button class="delete-sub-btn" onclick="deleteSub(${sub.id})">🗑️</button>
+        `;
+        subListEl.appendChild(div);
+    });
+};
+
+// App Actions
+const addExpense = async () => {
+    const amount = parseFloat(amountInput.value);
+    if (isNaN(amount) || amount <= 0) return amountInput.focus();
+    state.expenses.push({ id: Date.now(), amount, description: descInput.value.trim(), date: new Date().toISOString() });
+    state.viewingDate = new Date();
+    updateUI();
+    amountInput.value = ''; descInput.value = '';
+    await githubPushFile(EXP_FILENAME, state.expenses, 'expenses');
+};
+
+const addSub = async () => {
+    const name = subNameInp.value.trim();
+    const amount = parseFloat(subAmountInp.value);
+    if (!name || isNaN(amount)) return;
+    state.subscriptions.push({
+        id: Date.now(), name, amount,
+        frequency: subFreqSel.value,
+        day: parseInt(subDayInp.value) || 1,
+        month: subFreqSel.value === 'yearly' ? parseInt(subMonthInp.value) : null
+    });
+    updateUI();
+    subNameInp.value = ''; subAmountInp.value = '';
+    await githubPushFile(SUBS_FILENAME, state.subscriptions, 'subs');
+};
+
+window.deleteSub = async (id) => {
+    state.subscriptions = state.subscriptions.filter(s => s.id != id);
+    updateUI();
+    await githubPushFile(SUBS_FILENAME, state.subscriptions, 'subs');
 };
 
 // Events
-const addExpense = async () => {
-    const amount = parseFloat(amountInput.value);
-    const description = descInput.value.trim();
-
-    if (isNaN(amount) || amount <= 0) {
-        amountInput.focus();
-        return;
-    }
-
-    const newExpense = {
-        id: Date.now(),
-        amount: amount,
-        description: description,
-        date: new Date().toISOString(),
-    };
-
-    state.expenses.push(newExpense);
-    state.viewingDate = new Date();
-
-    updateUI();
-
-    amountInput.value = '';
-    descInput.value = '';
-
-    // Save to GitHub
-    await githubPush();
-};
-
-const changePeriod = (direction) => {
-    const currentPeriod = getPeriodInfo(state.viewingDate);
-    const newDate = new Date(currentPeriod.start);
-    direction === 'prev' ? newDate.setMonth(newDate.getMonth() - 1) : newDate.setMonth(newDate.getMonth() + 1);
-    newDate.setDate(15);
-    state.viewingDate = newDate;
-    updateUI();
-};
-
-// Settings Events
-const openSettings = () => {
-    ghUserInp.value = state.github.user;
-    ghRepoInp.value = state.github.repo;
-    ghTokenInp.value = state.github.token;
-    settingsModal.classList.remove('hide');
-};
-
-const closeSettings = () => settingsModal.classList.add('hide');
-
-const saveSettings = async () => {
-    const user = ghUserInp.value.trim();
-    const repo = ghRepoInp.value.trim();
-    const token = ghTokenInp.value.trim();
-
-    if (!user || !repo || !token) {
-        alert('すべての項目を入力してください。');
-        return;
-    }
-
-    state.github.user = user;
-    state.github.repo = repo;
-    state.github.token = token;
-
-    localStorage.setItem('gh-user', user);
-    localStorage.setItem('gh-repo', repo);
-    localStorage.setItem('gh-token', token);
-
-    closeSettings();
-    await githubFetch();
-};
-
-// Event Listeners
 addBtn.addEventListener('click', addExpense);
-prevBtn.addEventListener('click', () => changePeriod('prev'));
-nextBtn.addEventListener('click', () => changePeriod('next'));
-reloadBtn.addEventListener('click', githubFetch);
-settingsBtn.addEventListener('click', openSettings);
-closeSettingsBtn.addEventListener('click', closeSettings);
-saveSettingsBtn.addEventListener('click', saveSettings);
+addSubBtn.addEventListener('click', addSub);
+reloadBtn.addEventListener('click', githubFetchAll);
+prevBtn.addEventListener('click', () => {
+    const p = getPeriodInfo(state.viewingDate);
+    const d = new Date(p.start); d.setMonth(d.getMonth() - 1); d.setDate(15);
+    state.viewingDate = d; updateUI();
+});
+nextBtn.addEventListener('click', () => {
+    const p = getPeriodInfo(state.viewingDate);
+    const d = new Date(p.start); d.setMonth(d.getMonth() + 1); d.setDate(15);
+    state.viewingDate = d; updateUI();
+});
+settingsBtn.addEventListener('click', () => {
+    ghUserInp.value = state.github.user; ghRepoInp.value = state.github.repo; ghTokenInp.value = state.github.token;
+    settingsModal.classList.remove('hide');
+});
+closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hide'));
+saveSettingsBtn.addEventListener('click', async () => {
+    state.github.user = ghUserInp.value.trim();
+    state.github.repo = ghRepoInp.value.trim();
+    state.github.token = ghTokenInp.value.trim();
+    localStorage.setItem('gh-user', state.github.user);
+    localStorage.setItem('gh-repo', state.github.repo);
+    localStorage.setItem('gh-token', state.github.token);
+    await githubFetchAll();
+});
+subFreqSel.addEventListener('change', () => {
+    subMonthInp.classList.toggle('hide', subFreqSel.value === 'monthly');
+});
 
-amountInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') descInput.focus(); });
-descInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addExpense(); });
-
-// Initialize
+// Init
 (async () => {
-    // 1. Initial UI update with local state
     updateUI();
-
-    // 2. Migration check
-    const localData = localStorage.getItem('expenses');
-    if (localData && state.expenses.length === 0) {
-        state.expenses = JSON.parse(localData);
-        updateUI();
-    }
-
-    // 3. GitHub sync
-    if (state.github.user && state.github.repo && state.github.token) {
-        await githubFetch();
-    } else {
-        // If not configured, show the modal
-        openSettings();
-    }
+    if (state.github.token) await githubFetchAll();
+    else settingsModal.classList.remove('hide');
 })();
