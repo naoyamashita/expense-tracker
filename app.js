@@ -26,6 +26,7 @@ const periodDatesEl = document.getElementById('period-dates');
 const prevBtn = document.getElementById('prev-period');
 const nextBtn = document.getElementById('next-period');
 const reloadBtn = document.getElementById('reload-btn');
+const todayBtn = document.getElementById('today-btn');
 
 // Settings & Sub Selectors
 const settingsBtn = document.getElementById('settings-btn');

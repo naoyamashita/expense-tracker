@@ -72,6 +72,10 @@ body {
 
 .period-info {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
 }
 
 #period-name {
@@ -85,6 +89,30 @@ body {
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.today-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: auto;
+    min-height: auto;
+    box-shadow: none;
+    transition: all 0.2s;
+}
+
+.today-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.today-btn:active {
+    transform: scale(0.95);
 }
 
 .nav-btn {
