@@ -264,6 +264,10 @@ window.deleteSub = async (id) => {
 // Events
 addBtn.addEventListener('click', addExpense);
 addSubBtn.addEventListener('click', addSub);
+todayBtn.addEventListener('click', () => {
+    state.viewingDate = new Date();
+    updateUI();
+});
 reloadBtn.addEventListener('click', githubFetchAll);
 prevBtn.addEventListener('click', () => {
     const p = getPeriodInfo(state.viewingDate);
