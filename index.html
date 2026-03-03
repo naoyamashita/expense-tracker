@@ -15,7 +15,17 @@
 <body>
     <div class="container">
         <header>
+            <div class="header-top">
+                <button id="settings-btn" class="icon-btn" title="設定">⚙️</button>
+                <div id="sync-status" class="sync-status hide">
+                    <span class="sync-spinner"></span>
+                    <span id="sync-text">同期中...</span>
+                </div>
+            </div>
             <h1>Expense Tracker</h1>
+        </header>
+
+        <main>
             <section class="period-selector">
                 <button id="prev-period" class="nav-btn">&lt;</button>
                 <div class="period-info">
@@ -48,7 +58,32 @@
                     <!-- 履歴がここに追加されます -->
                 </ul>
             </section>
+        </main>
     </div>
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hide">
+        <div class="modal-content">
+            <h2>GitHub連携設定</h2>
+            <p class="settings-desc">データをGitHub上のCSVとして保存するための設定です。</p>
+            <div class="input-group">
+                <label>GitHubユーザー名</label>
+                <input type="text" id="gh-user" placeholder="naoyamashita">
+            </div>
+            <div class="input-group">
+                <label>リポジトリ名</label>
+                <input type="text" id="gh-repo" placeholder="expense-tracker">
+            </div>
+            <div class="input-group">
+                <label>アクセストークン (PAT)</label>
+                <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+            </div>
+            <div class="modal-actions">
+                <button id="save-settings" class="btn-primary">保存して接続</button>
+                <button id="close-settings" class="btn-secondary">閉じる</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 
