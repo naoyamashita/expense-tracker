@@ -82,7 +82,35 @@
                 <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
             </div>
             <div class="modal-actions">
-                <button id="save-settings" class="btn-primary">保存して接続</button>
+                <button id="save-settings" class="btn-primary">保存して反映</button>
+            </div>
+
+            <hr class="modal-divider">
+
+            <h3>サブスクリプション設定</h3>
+            <p class="settings-desc">定期的な出費（月額・年額）を登録します。</p>
+
+            <div id="sub-list" class="sub-list">
+                <!-- サブスク一覧がここに追加されます -->
+            </div>
+
+            <div class="sub-form">
+                <input type="text" id="sub-name" placeholder="名称 (例: Netflix)">
+                <div class="sub-form-row">
+                    <input type="number" id="sub-amount" placeholder="金額" min="0">
+                    <select id="sub-freq">
+                        <option value="monthly">毎月</option>
+                        <option value="yearly">毎年</option>
+                    </select>
+                </div>
+                <div id="sub-date-group" class="sub-form-row">
+                    <input type="number" id="sub-day" placeholder="日 (1-31)" min="1" max="31">
+                    <input type="number" id="sub-month" placeholder="月 (年額のみ)" min="1" max="12" class="hide">
+                </div>
+                <button id="add-sub-btn" class="btn-secondary">サブスクを追加</button>
+            </div>
+
+            <div class="modal-actions">
                 <button id="close-settings" class="btn-secondary">閉じる</button>
             </div>
         </div>
