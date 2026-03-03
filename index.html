@@ -16,11 +16,11 @@
     <div class="container">
         <header>
             <div class="header-top">
-                <button id="settings-btn" class="icon-btn" title="設定">⚙️</button>
                 <div id="sync-status" class="sync-status hide">
                     <span class="sync-spinner"></span>
                     <span id="sync-text">同期中...</span>
                 </div>
+                <button id="reload-btn" class="icon-btn small" title="再読み込み">🔄</button>
             </div>
             <h1>Expense Tracker</h1>
         </header>
@@ -59,6 +59,10 @@
                 </ul>
             </section>
         </main>
+
+        <footer>
+            <button id="settings-btn" class="settings-link-btn">GitHub連携設定 ⚙️</button>
+        </footer>
     </div>
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal hide">

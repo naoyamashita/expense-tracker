@@ -22,6 +22,7 @@ const periodNameEl = document.getElementById('period-name');
 const periodDatesEl = document.getElementById('period-dates');
 const prevBtn = document.getElementById('prev-period');
 const nextBtn = document.getElementById('next-period');
+const reloadBtn = document.getElementById('reload-btn');
 
 // Settings Selectors
 const settingsBtn = document.getElementById('settings-btn');
@@ -259,6 +260,7 @@ const saveSettings = async () => {
 addBtn.addEventListener('click', addExpense);
 prevBtn.addEventListener('click', () => changePeriod('prev'));
 nextBtn.addEventListener('click', () => changePeriod('next'));
+reloadBtn.addEventListener('click', githubFetch);
 settingsBtn.addEventListener('click', openSettings);
 closeSettingsBtn.addEventListener('click', closeSettings);
 saveSettingsBtn.addEventListener('click', saveSettings);
