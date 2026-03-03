@@ -268,18 +268,21 @@ descInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addExpens
 
 // Initialize
 (async () => {
-    // Migration check (optional but good for UX)
+    // 1. Initial UI update with local state
+    updateUI();
+
+    // 2. Migration check
     const localData = localStorage.getItem('expenses');
     if (localData && state.expenses.length === 0) {
-        console.log('Migrating local data...');
         state.expenses = JSON.parse(localData);
-        // We'll prompt user to sync after they set up GitHub
+        updateUI();
     }
 
-    if (state.github.token) {
+    // 3. GitHub sync
+    if (state.github.user && state.github.repo && state.github.token) {
         await githubFetch();
     } else {
-        updateUI();
-        openSettings(); // Prompt for setup if not configured
+        // If not configured, show the modal
+        openSettings();
     }
 })();
