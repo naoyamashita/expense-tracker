@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker | スマートな出費管理</title>
+    <meta name="description" content="シンプルで美しい出費管理ツール">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Expense Tracker</h1>
+            <section class="period-selector">
+                <button id="prev-period" class="nav-btn">&lt;</button>
+                <div class="period-info">
+                    <p id="period-name">2026年3月度</p>
+                    <span id="period-dates">2/11 ~ 3/10</span>
+                </div>
+                <button id="next-period" class="nav-btn">&gt;</button>
+            </section>
+
+            <section class="total-display">
+                <div class="total-amount">
+                    <span class="total-currency">¥</span>
+                    <span id="monthly-total">0</span>
+                </div>
+            </section>
+
+            <section class="input-section">
+                <div class="input-group">
+                    <input type="number" id="amount-input" placeholder="金額を入力 (例: 1000)" min="0" inputmode="decimal">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="desc-input" placeholder="内容 (例: ランチ、コンビニ)">
+                </div>
+                <button id="add-btn">出費を追加</button>
+            </section>
+
+            <section class="history-section">
+                <h2>最近の履歴</h2>
+                <ul class="history-list" id="history-list">
+                    <!-- 履歴がここに追加されます -->
+                </ul>
+            </section>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>
