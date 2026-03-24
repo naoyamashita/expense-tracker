@@ -13,7 +13,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="index.css?v=2">
+    <link rel="stylesheet" href="index.css?v=3">
 </head>
 
 <body>
@@ -26,7 +26,7 @@
                 </div>
                 <button id="reload-btn" class="icon-btn small" title="再読み込み">🔄</button>
             </div>
-            <h1>Expense Tracker</h1>
+            <h1>Expense Tracker <span id="profile-display" class="profile-badge hide"></span></h1>
         </header>
 
         <main>
@@ -75,6 +75,10 @@
             <h2>GitHub連携設定</h2>
             <p class="settings-desc">データをGitHub上のCSVとして保存するための設定です。</p>
             <div class="input-group">
+                <label>プロフィール名 (家族で分ける場合)</label>
+                <input type="text" id="gh-profile" placeholder="パパ (空欄で共通データ)">
+            </div>
+            <div class="input-group">
                 <label>GitHubユーザー名</label>
                 <input type="text" id="gh-user" placeholder="naoyamashita">
             </div>
@@ -121,7 +125,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=2"></script>
+    <script src="app.js?v=3"></script>
 </body>
 
 </html>

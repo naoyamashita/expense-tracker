@@ -4,6 +4,7 @@ const state = {
     subscriptions: [],
     viewingDate: new Date(),
     github: {
+        profile: localStorage.getItem('gh-profile') || '',
         user: localStorage.getItem('gh-user') || '',
         repo: localStorage.getItem('gh-repo') || '',
         token: localStorage.getItem('gh-token') || '',
@@ -12,8 +13,8 @@ const state = {
     }
 };
 
-const EXP_FILENAME = 'data.csv';
-const SUBS_FILENAME = 'subscriptions.csv';
+const getExpFilename = () => state.github.profile ? `data_${state.github.profile}.csv` : 'data.csv';
+const getSubFilename = () => state.github.profile ? `subscriptions_${state.github.profile}.csv` : 'subscriptions.csv';
 
 // Selectors
 const monthlyTotalEl = document.getElementById('monthly-total');
@@ -34,6 +35,8 @@ const saveSettingsBtn = document.getElementById('save-settings');
 const settingsBtn = document.getElementById('settings-btn');
 const settingsModal = document.getElementById('settings-modal');
 const closeSettingsBtn = document.getElementById('close-settings');
+const ghProfileInp = document.getElementById('gh-profile');
+const profileDisplay = document.getElementById('profile-display');
 const ghUserInp = document.getElementById('gh-user');
 const ghRepoInp = document.getElementById('gh-repo');
 const ghTokenInp = document.getElementById('gh-token');
@@ -92,25 +95,25 @@ const showSync = (text) => {
 };
 const hideSync = () => syncStatus.classList.add('hide');
 
-const githubFetchFile = async (filename) => {
+const githubFetchFile = async (filename, type) => {
     const { user, repo, token } = state.github;
     const url = `https://api.github.com/repos/${user}/${repo}/contents/${filename}`;
-    const res = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+    const res = await fetch(url, { headers: { 'Authorization': `token ${token}` }, cache: 'no-store' });
     if (res.status === 404) return null;
     const json = await res.json();
     const content = decodeURIComponent(escape(atob(json.content)));
-    return { sha: json.sha, content: csvToJson(content, filename === EXP_FILENAME ? 'expenses' : 'subs') };
+    return { sha: json.sha, content: csvToJson(content, type) };
 };
 
 const githubFetchAll = async () => {
     if (!state.github.token) return;
     showSync('同期中...');
     try {
-        const expData = await githubFetchFile(EXP_FILENAME);
-        if (expData) { state.expenses = expData.content; state.github.sha_expenses = expData.sha; }
+        const expData = await githubFetchFile(getExpFilename(), 'expenses');
+        if (expData) { state.expenses = expData.content; state.github.sha_expenses = expData.sha; } else { state.expenses = []; state.github.sha_expenses = ''; }
 
-        const subData = await githubFetchFile(SUBS_FILENAME);
-        if (subData) { state.subscriptions = subData.content; state.github.sha_subs = subData.sha; }
+        const subData = await githubFetchFile(getSubFilename(), 'subs');
+        if (subData) { state.subscriptions = subData.content; state.github.sha_subs = subData.sha; } else { state.subscriptions = []; state.github.sha_subs = ''; }
     } catch (e) {
         console.error('Fetch error', e);
     } finally {
@@ -151,6 +154,12 @@ const getPeriodInfo = (date) => {
 };
 
 const updateUI = () => {
+    if (state.github.profile) {
+        profileDisplay.textContent = state.github.profile;
+        profileDisplay.classList.remove('hide');
+    } else {
+        profileDisplay.classList.add('hide');
+    }
     const period = getPeriodInfo(state.viewingDate);
     periodNameEl.textContent = period.name;
     periodDatesEl.textContent = `${period.start.getMonth() + 1}/${period.start.getDate()} ~ ${period.end.getMonth() + 1}/${period.end.getDate()}`;
@@ -239,7 +248,7 @@ const addExpense = async () => {
     state.viewingDate = new Date();
     updateUI();
     amountInput.value = ''; descInput.value = '';
-    await githubPushFile(EXP_FILENAME, state.expenses, 'expenses');
+    await githubPushFile(getExpFilename(), state.expenses, 'expenses');
 };
 
 const addSub = async () => {
@@ -254,13 +263,13 @@ const addSub = async () => {
     });
     updateUI();
     subNameInp.value = ''; subAmountInp.value = '';
-    await githubPushFile(SUBS_FILENAME, state.subscriptions, 'subs');
+    await githubPushFile(getSubFilename(), state.subscriptions, 'subs');
 };
 
 window.deleteSub = async (id) => {
     state.subscriptions = state.subscriptions.filter(s => s.id != id);
     updateUI();
-    await githubPushFile(SUBS_FILENAME, state.subscriptions, 'subs');
+    await githubPushFile(getSubFilename(), state.subscriptions, 'subs');
 };
 
 // Events
@@ -282,7 +291,7 @@ nextBtn.addEventListener('click', () => {
     state.viewingDate = d; updateUI();
 });
 settingsBtn.addEventListener('click', () => {
-    ghUserInp.value = state.github.user; ghRepoInp.value = state.github.repo; ghTokenInp.value = state.github.token;
+    ghProfileInp.value = state.github.profile; ghUserInp.value = state.github.user; ghRepoInp.value = state.github.repo; ghTokenInp.value = state.github.token;
     settingsModal.classList.remove('hide');
 });
 closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hide'));
@@ -290,6 +299,7 @@ saveSettingsBtn.addEventListener('click', async () => {
     const user = ghUserInp.value.trim();
     const repo = ghRepoInp.value.trim();
     const token = ghTokenInp.value.trim();
+    const profile = ghProfileInp.value.trim();
 
     if (!user || !repo || !token) {
         alert('GitHubユーザー名、リポジトリ名、アクセストークンのすべてを入力してください。');
@@ -302,13 +312,21 @@ saveSettingsBtn.addEventListener('click', async () => {
     saveSettingsBtn.textContent = '保存中...';
 
     try {
+        state.github.profile = profile;
         state.github.user = user;
         state.github.repo = repo;
         state.github.token = token;
 
+        localStorage.setItem('gh-profile', profile);
         localStorage.setItem('gh-user', user);
         localStorage.setItem('gh-repo', repo);
         localStorage.setItem('gh-token', token);
+
+        // Reset state so that old data doesn't persist if new fetch fails or gives empty
+        state.expenses = [];
+        state.subscriptions = [];
+        state.github.sha_expenses = '';
+        state.github.sha_subs = '';
 
         // Fetch to verify settings and sync
         await githubFetchAll();
