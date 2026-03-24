@@ -27,12 +27,13 @@ const prevBtn = document.getElementById('prev-period');
 const nextBtn = document.getElementById('next-period');
 const reloadBtn = document.getElementById('reload-btn');
 const todayBtn = document.getElementById('today-btn');
+const saveSettingsBtn = document.getElementById('save-settings');
+
 
 // Settings & Sub Selectors
 const settingsBtn = document.getElementById('settings-btn');
 const settingsModal = document.getElementById('settings-modal');
 const closeSettingsBtn = document.getElementById('close-settings');
-const saveSettingsBtn = document.getElementById('save-settings');
 const ghUserInp = document.getElementById('gh-user');
 const ghRepoInp = document.getElementById('gh-repo');
 const ghTokenInp = document.getElementById('gh-token');
@@ -184,21 +185,7 @@ const updateUI = () => {
     // History: Combine Manual + Subs (UI only)
     historyList.innerHTML = '';
 
-    // Add Subs to history display
-    activeSubs.forEach(sub => {
-        const item = document.createElement('li');
-        item.className = 'history-item sub-entry';
-        item.style.borderLeft = '4px solid var(--accent-secondary)';
-        item.innerHTML = `
-            <div class="item-info">
-                <span class="item-desc">🔄 ${sub.name}</span>
-                <span class="item-date">固定費</span>
-            </div>
-            <span class="item-amount">¥${formatNumber(sub.amount)}</span>
-        `;
-        historyList.appendChild(item);
-    });
-
+    // Add Manual Expenses to history display first
     periodExpenses.slice().reverse().forEach(exp => {
         const item = document.createElement('li');
         item.className = 'history-item';
@@ -209,6 +196,21 @@ const updateUI = () => {
                 <span class="item-date">${d.getMonth() + 1}/${d.getDate()}</span>
             </div>
             <span class="item-amount">¥${formatNumber(exp.amount)}</span>
+        `;
+        historyList.appendChild(item);
+    });
+
+    // Add Subs to history display at the bottom
+    activeSubs.forEach(sub => {
+        const item = document.createElement('li');
+        item.className = 'history-item sub-entry';
+        item.style.borderLeft = '4px solid var(--accent-secondary)';
+        item.innerHTML = `
+            <div class="item-info">
+                <span class="item-desc">🔄 ${sub.name}</span>
+                <span class="item-date">固定費</span>
+            </div>
+            <span class="item-amount">¥${formatNumber(sub.amount)}</span>
         `;
         historyList.appendChild(item);
     });
@@ -285,13 +287,46 @@ settingsBtn.addEventListener('click', () => {
 });
 closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hide'));
 saveSettingsBtn.addEventListener('click', async () => {
-    state.github.user = ghUserInp.value.trim();
-    state.github.repo = ghRepoInp.value.trim();
-    state.github.token = ghTokenInp.value.trim();
-    localStorage.setItem('gh-user', state.github.user);
-    localStorage.setItem('gh-repo', state.github.repo);
-    localStorage.setItem('gh-token', state.github.token);
-    await githubFetchAll();
+    const user = ghUserInp.value.trim();
+    const repo = ghRepoInp.value.trim();
+    const token = ghTokenInp.value.trim();
+
+    if (!user || !repo || !token) {
+        alert('GitHubユーザー名、リポジトリ名、アクセストークンのすべてを入力してください。');
+        return;
+    }
+
+    // Feedback: Disable button and show loading
+    const originalText = saveSettingsBtn.textContent;
+    saveSettingsBtn.disabled = true;
+    saveSettingsBtn.textContent = '保存中...';
+
+    try {
+        state.github.user = user;
+        state.github.repo = repo;
+        state.github.token = token;
+
+        localStorage.setItem('gh-user', user);
+        localStorage.setItem('gh-repo', repo);
+        localStorage.setItem('gh-token', token);
+
+        // Fetch to verify settings and sync
+        await githubFetchAll();
+
+        // If fetch failed due to invalid token/repo, we might want to alert, 
+        // but current githubFetchAll just logs to console.
+        // For now, let's assume it works if no error thrown.
+
+        // Auto-close modal on success
+        settingsModal.classList.add('hide');
+        alert('設定を保存し、同期を完了しました。');
+    } catch (e) {
+        console.error('Save settings error', e);
+        alert('設定の保存中にエラーが発生しました。接続情報を確認してください。');
+    } finally {
+        saveSettingsBtn.disabled = false;
+        saveSettingsBtn.textContent = originalText;
+    }
 });
 subFreqSel.addEventListener('change', () => {
     subMonthInp.classList.toggle('hide', subFreqSel.value === 'monthly');

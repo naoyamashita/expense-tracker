@@ -359,6 +359,17 @@ footer {
     align-items: center;
     z-index: 9999;
     padding: 1rem;
+    overflow-y: auto;
+    /* Allow background to scroll if needed */
+}
+
+@media (max-height: 600px),
+(max-width: 480px) {
+    .modal {
+        align-items: flex-start;
+        /* Align to top to give more room for keyboard */
+        padding-top: 2rem;
+    }
 }
 
 .modal-content {
@@ -369,8 +380,11 @@ footer {
     width: 100%;
     max-width: 440px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    max-height: 90vh;
+    max-height: 85vh;
+    /* Reduced max-height to ensure it doesn't hit screen edges */
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-content h2 {
@@ -402,7 +416,8 @@ footer {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    margin-top: 1.5rem;
+    margin: 1.5rem 0 2rem 0;
+    /* Added bottom margin for extra spacing */
 }
 
 .btn-primary {
@@ -431,6 +446,15 @@ footer {
 
 .sub-list {
     margin-bottom: 1.5rem;
+}
+
+.modal-divider {
+    display: block !important;
+    width: 100% !important;
+    margin: 3.5rem 0 2rem 0 !important;
+    border: none !important;
+    height: 1px !important;
+    background: var(--glass-border) !important;
 }
 
 .sub-item {
