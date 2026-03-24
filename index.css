@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=M+PLUS+Rounded+1c:wght@400;700&display=swap');
 
 :root {
     --bg-color: #0f172a;
@@ -580,4 +580,177 @@ footer {
 .item-amount {
     font-weight: 600;
     color: var(--success);
+}
+
+/* Kids Theme Overrides */
+html.theme-kids body, html.theme-kids {
+    font-family: 'M PLUS Rounded 1c', 'Outfit', sans-serif;
+    background-color: #fefce8;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(250, 204, 21, 0.4) 0, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.4) 0, transparent 50%);
+    color: #334155;
+}
+
+html.theme-kids .container {
+    background: rgba(255, 255, 255, 0.85);
+    border: 3px solid #fcd34d;
+    box-shadow: 0 10px 25px rgba(250, 204, 21, 0.2);
+    border-radius: 32px;
+}
+
+html.theme-kids h1 {
+    background: linear-gradient(to right, #f59e0b, #ec4899);
+    background-clip: text;
+    -webkit-background-clip: text;
+}
+
+html.theme-kids .total-amount {
+    color: #f59e0b;
+    font-size: 3.5rem;
+    text-shadow: 2px 2px 0px rgba(245, 158, 11, 0.2);
+}
+
+html.theme-kids input,
+html.theme-kids select {
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    color: #334155;
+    border-radius: 20px;
+    font-family: inherit;
+    font-weight: 700;
+}
+
+html.theme-kids input:focus,
+html.theme-kids select:focus {
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.3);
+}
+
+html.theme-kids button {
+    background: linear-gradient(to bottom, #fde047, #f59e0b);
+    color: #fff;
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
+    border-radius: 20px;
+    border: 2px solid #d97706;
+    box-shadow: 0 6px 0 #b45309, 0 8px 15px rgba(245, 158, 11, 0.4);
+    transition: all 0.1s;
+    font-size: 1.1rem;
+    font-family: inherit;
+    margin-bottom: 6px;
+    min-height: 50px;
+}
+
+html.theme-kids button:active {
+    transform: translateY(6px);
+    box-shadow: 0 0px 0 #b45309, 0 2px 5px rgba(245, 158, 11, 0.4);
+    margin-bottom: 0px;
+}
+
+html.theme-kids .period-selector {
+    background: #fff;
+    border: 2px solid #fcd34d;
+    border-radius: 24px;
+}
+
+html.theme-kids #period-name {
+    color: #f59e0b;
+}
+
+html.theme-kids #period-dates,
+html.theme-kids .settings-desc,
+html.theme-kids .item-date,
+html.theme-kids .total-label,
+html.theme-kids .settings-link-btn {
+    color: #64748b;
+}
+
+html.theme-kids .settings-link-btn:hover {
+    color: #f59e0b;
+}
+
+html.theme-kids .nav-btn,
+html.theme-kids .icon-btn {
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    color: #f59e0b;
+    box-shadow: 0 4px 0 #94a3b8 !important;
+    margin-bottom: 4px;
+}
+html.theme-kids .nav-btn:active,
+html.theme-kids .icon-btn:active {
+    transform: translateY(4px) !important;
+    box-shadow: 0 0px 0 #94a3b8 !important;
+    margin-bottom: 0px;
+}
+
+html.theme-kids .today-btn {
+    background: #fde047;
+    color: #b45309;
+    border: 2px solid #f59e0b;
+    border-radius: 12px;
+    font-weight: 700;
+    margin-bottom: 0;
+    box-shadow: none;
+    min-height: auto;
+}
+html.theme-kids .today-btn:active {
+    transform: scale(0.95);
+    box-shadow: none;
+}
+
+html.theme-kids .history-item {
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 20px;
+    box-shadow: 0 4px 0 #e2e8f0;
+    margin-bottom: 1rem;
+}
+
+html.theme-kids .modal-content {
+    background: #fefce8;
+    color: #334155;
+    border: 4px solid #fcd34d;
+}
+
+html.theme-kids .modal-content h2,
+html.theme-kids .modal-content h3 {
+    color: #f59e0b;
+    background: none;
+    -webkit-text-fill-color: initial;
+}
+
+html.theme-kids .btn-secondary {
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    color: #64748b;
+    box-shadow: 0 4px 0 #94a3b8;
+}
+
+html.theme-kids .sub-item {
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    color: #334155;
+}
+
+html.theme-kids .sub-form {
+    background: #fff;
+    border: 2px dashed #fcd34d;
+}
+
+html.theme-kids .profile-badge {
+    background: #fde047;
+    color: #b45309;
+    border: 2px solid #f59e0b;
+}
+
+html.theme-kids .sync-status {
+    background: #fff;
+    border: 2px solid #fcd34d;
+    color: #f59e0b;
+}
+
+html.theme-kids .sync-spinner {
+    border-color: #fcd34d;
+    border-top-color: #f59e0b;
 }

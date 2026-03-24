@@ -35,6 +35,7 @@ const saveSettingsBtn = document.getElementById('save-settings');
 const settingsBtn = document.getElementById('settings-btn');
 const settingsModal = document.getElementById('settings-modal');
 const closeSettingsBtn = document.getElementById('close-settings');
+const appThemeSel = document.getElementById('app-theme');
 const ghProfileInp = document.getElementById('gh-profile');
 const profileDisplay = document.getElementById('profile-display');
 const ghUserInp = document.getElementById('gh-user');
@@ -53,6 +54,13 @@ const addSubBtn = document.getElementById('add-sub-btn');
 
 // Helper: Format Number
 const formatNumber = (num) => new Intl.NumberFormat('ja-JP').format(num);
+
+// Theme Logic
+const applyTheme = (theme) => {
+    document.documentElement.className = theme === 'kids' ? 'theme-kids' : '';
+};
+const initTheme = localStorage.getItem('app-theme') || 'standard';
+applyTheme(initTheme);
 
 // Logic: CSV Handling
 const jsonToCsv = (data, type) => {
@@ -291,6 +299,7 @@ nextBtn.addEventListener('click', () => {
     state.viewingDate = d; updateUI();
 });
 settingsBtn.addEventListener('click', () => {
+    appThemeSel.value = localStorage.getItem('app-theme') || 'standard';
     ghProfileInp.value = state.github.profile; ghUserInp.value = state.github.user; ghRepoInp.value = state.github.repo; ghTokenInp.value = state.github.token;
     settingsModal.classList.remove('hide');
 });
@@ -300,6 +309,7 @@ saveSettingsBtn.addEventListener('click', async () => {
     const repo = ghRepoInp.value.trim();
     const token = ghTokenInp.value.trim();
     const profile = ghProfileInp.value.trim();
+    const theme = appThemeSel.value;
 
     if (!user || !repo || !token) {
         alert('GitHubユーザー名、リポジトリ名、アクセストークンのすべてを入力してください。');
@@ -321,6 +331,9 @@ saveSettingsBtn.addEventListener('click', async () => {
         localStorage.setItem('gh-user', user);
         localStorage.setItem('gh-repo', repo);
         localStorage.setItem('gh-token', token);
+        localStorage.setItem('app-theme', theme);
+
+        applyTheme(theme);
 
         // Reset state so that old data doesn't persist if new fetch fails or gives empty
         state.expenses = [];

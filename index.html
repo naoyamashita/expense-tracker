@@ -13,7 +13,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="index.css?v=3">
+    <link rel="stylesheet" href="index.css?v=4">
 </head>
 
 <body>
@@ -75,6 +75,13 @@
             <h2>GitHub連携設定</h2>
             <p class="settings-desc">データをGitHub上のCSVとして保存するための設定です。</p>
             <div class="input-group">
+                <label>テーマ (着せ替え)</label>
+                <select id="app-theme" class="theme-select">
+                    <option value="standard">標準 (ダーク・クール)</option>
+                    <option value="kids">キッズ (明るい・ポップ)</option>
+                </select>
+            </div>
+            <div class="input-group">
                 <label>プロフィール名 (家族で分ける場合)</label>
                 <input type="text" id="gh-profile" placeholder="パパ (空欄で共通データ)">
             </div>
@@ -125,7 +132,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
 </body>
 
 </html>
