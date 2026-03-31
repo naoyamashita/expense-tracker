@@ -582,6 +582,38 @@ footer {
     color: var(--success);
 }
 
+.item-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0 4px;
+    width: auto;
+    min-height: auto;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, transform 0.2s;
+    line-height: 1;
+}
+
+.delete-btn:hover {
+    color: #ef4444;
+    transform: scale(1.2);
+}
+
+.delete-btn:active {
+    transform: scale(0.9);
+}
+
 /* Kids Theme Overrides */
 html.theme-kids body, html.theme-kids {
     font-family: 'M PLUS Rounded 1c', 'Outfit', sans-serif;

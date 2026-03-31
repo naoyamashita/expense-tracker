@@ -212,7 +212,10 @@ const updateUI = () => {
                 <span class="item-desc">${exp.description || '出費'}</span>
                 <span class="item-date">${d.getMonth() + 1}/${d.getDate()}</span>
             </div>
-            <span class="item-amount">¥${formatNumber(exp.amount)}</span>
+            <div class="item-right">
+                <span class="item-amount">¥${formatNumber(exp.amount)}</span>
+                <button class="delete-btn" onclick="deleteExpense(${exp.id})">×</button>
+            </div>
         `;
         historyList.appendChild(item);
     });
@@ -256,6 +259,13 @@ const addExpense = async () => {
     state.viewingDate = new Date();
     updateUI();
     amountInput.value = ''; descInput.value = '';
+    await githubPushFile(getExpFilename(), state.expenses, 'expenses');
+};
+
+window.deleteExpense = async (id) => {
+    if (!confirm('この出費を削除しますか？')) return;
+    state.expenses = state.expenses.filter(e => e.id != id);
+    updateUI();
     await githubPushFile(getExpFilename(), state.expenses, 'expenses');
 };
 
