@@ -57,7 +57,7 @@ const formatNumber = (num) => new Intl.NumberFormat('ja-JP').format(num);
 
 // Theme Logic
 const applyTheme = (theme) => {
-    document.documentElement.className = theme === 'kids' ? 'theme-kids' : '';
+    document.documentElement.className = theme === 'standard' ? '' : `theme-${theme}`;
 };
 const initTheme = localStorage.getItem('app-theme') || 'standard';
 applyTheme(initTheme);

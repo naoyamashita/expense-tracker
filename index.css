@@ -615,10 +615,11 @@ footer {
 }
 
 /* Kids Theme Overrides */
-html.theme-kids body, html.theme-kids {
+html.theme-kids body,
+html.theme-kids {
     font-family: 'M PLUS Rounded 1c', 'Outfit', sans-serif;
     background-color: #fefce8;
-    background-image: 
+    background-image:
         radial-gradient(at 0% 0%, rgba(250, 204, 21, 0.4) 0, transparent 50%),
         radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.4) 0, transparent 50%);
     color: #334155;
@@ -662,7 +663,7 @@ html.theme-kids select:focus {
 html.theme-kids button {
     background: linear-gradient(to bottom, #fde047, #f59e0b);
     color: #fff;
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
     border-radius: 20px;
     border: 2px solid #d97706;
     box-shadow: 0 6px 0 #b45309, 0 8px 15px rgba(245, 158, 11, 0.4);
@@ -709,6 +710,7 @@ html.theme-kids .icon-btn {
     box-shadow: 0 4px 0 #94a3b8 !important;
     margin-bottom: 4px;
 }
+
 html.theme-kids .nav-btn:active,
 html.theme-kids .icon-btn:active {
     transform: translateY(4px) !important;
@@ -726,6 +728,7 @@ html.theme-kids .today-btn {
     box-shadow: none;
     min-height: auto;
 }
+
 html.theme-kids .today-btn:active {
     transform: scale(0.95);
     box-shadow: none;
@@ -785,4 +788,213 @@ html.theme-kids .sync-status {
 html.theme-kids .sync-spinner {
     border-color: #fcd34d;
     border-top-color: #f59e0b;
+}
+
+/* Princess Theme Overrides */
+html.theme-princess body,
+html.theme-princess {
+    font-family: 'M PLUS Rounded 1c', 'Outfit', sans-serif;
+    background-color: #fff5f8;
+    background-image:
+        radial-gradient(at 0% 0%, rgba(255, 128, 171, 0.2) 0, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(244, 143, 177, 0.2) 0, transparent 50%);
+    color: #880e4f;
+}
+
+html.theme-princess .container {
+    background: rgba(255, 255, 255, 0.9);
+    border: 3px solid #f48fb1;
+    box-shadow: 0 10px 30px rgba(255, 128, 171, 0.15);
+    border-radius: 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Corner Ribbon Decoration */
+html.theme-princess .container::before {
+    content: "🎀";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 2rem;
+    z-index: 10;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+html.theme-princess .container::after {
+    content: "🎀";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 2rem;
+    z-index: 10;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+html.theme-princess h1 {
+    background: linear-gradient(to right, #ff80ab, #f06292);
+    background-clip: text;
+    -webkit-background-clip: text;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+}
+
+html.theme-princess .total-amount {
+    color: #d81b60;
+    font-size: 3.5rem;
+    text-shadow: 2px 2px 0px rgba(255, 128, 171, 0.1);
+}
+
+html.theme-princess input,
+html.theme-princess select {
+    background: #fff;
+    border: 2px solid #f8bbd0;
+    color: #880e4f;
+    border-radius: 20px;
+    font-family: inherit;
+}
+
+html.theme-princess input:focus,
+html.theme-princess select:focus {
+    border-color: #ff80ab;
+    box-shadow: 0 0 0 4px rgba(255, 128, 171, 0.2);
+}
+
+html.theme-princess button {
+    background: linear-gradient(to bottom, #ff80ab, #f06292);
+    color: #fff;
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 4px 0 #c2185b, 0 8px 15px rgba(255, 128, 171, 0.3);
+    transition: all 0.1s;
+    font-family: inherit;
+    margin-bottom: 4px;
+}
+
+html.theme-princess button:active {
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 #c2185b, 0 2px 5px rgba(255, 128, 171, 0.3);
+    margin-bottom: 0px;
+}
+
+html.theme-princess .period-selector {
+    background: #fff;
+    border: 2px solid #f8bbd0;
+    border-radius: 24px;
+}
+
+html.theme-princess #period-name {
+    color: #ad1457;
+}
+
+html.theme-princess #period-dates,
+html.theme-princess .settings-desc,
+html.theme-princess .item-date,
+html.theme-princess .total-label,
+html.theme-princess .settings-link-btn {
+    color: #c2185b;
+    opacity: 0.7;
+}
+
+html.theme-princess .settings-link-btn:hover {
+    color: #ff80ab;
+    opacity: 1;
+}
+
+html.theme-princess .nav-btn,
+html.theme-princess .icon-btn {
+    background: #fff;
+    border: 2px solid #f8bbd0;
+    color: #f06292;
+    box-shadow: 0 4px 0 #f48fb1 !important;
+    margin-bottom: 4px;
+}
+
+html.theme-princess .nav-btn:active,
+html.theme-princess .icon-btn:active {
+    transform: translateY(4px) !important;
+    box-shadow: 0 0px 0 #f48fb1 !important;
+    margin-bottom: 0px;
+}
+
+html.theme-princess .today-btn {
+    background: #f8bbd0;
+    color: #ad1457;
+    border: 1px solid #f48fb1;
+    border-radius: 12px;
+    margin-bottom: 0;
+    box-shadow: none;
+}
+
+html.theme-princess .history-item {
+    background: #ffffff;
+    border: 1px solid #f8bbd0;
+    border-radius: 20px;
+    box-shadow: 0 3px 0 #f8bbd0;
+    margin-bottom: 1rem;
+}
+
+html.theme-princess .modal-content {
+    background: #fff5f8;
+    color: #880e4f;
+    border: 4px solid #f8bbd0;
+}
+
+html.theme-princess .modal-content h2,
+html.theme-princess .modal-content h3 {
+    color: #ad1457;
+    background: none;
+    -webkit-text-fill-color: initial;
+}
+
+html.theme-princess .btn-secondary {
+    background: #fff;
+    border: 2px solid #f8bbd0;
+    color: #ad1457;
+    box-shadow: 0 4px 0 #f48fb1;
+}
+
+html.theme-princess .sub-item {
+    background: #fff;
+    border: 1px solid #f8bbd0;
+    color: #880e4f;
+}
+
+html.theme-princess .sub-form {
+    background: #fff;
+    border: 2px dashed #f8bbd0;
+}
+
+html.theme-princess .profile-badge {
+    background: #f8bbd0;
+    color: #ad1457;
+    border: 1px solid #f48fb1;
+}
+
+html.theme-princess .sync-status {
+    background: #fff;
+    border: 2px solid #f8bbd0;
+    color: #f06292;
+}
+
+html.theme-princess .sync-spinner {
+    border-color: #f8bbd0;
+    border-top-color: #f06292;
+}
+
+html.theme-princess .item-amount {
+    color: #ec4899;
+}
+
+html.theme-princess #add-btn {
+    position: relative;
+    overflow: visible;
+}
+
+html.theme-princess #add-btn::after {
+    content: "🎀";
+    position: absolute;
+    top: -15px;
+    right: -10px;
+    font-size: 1.5rem;
+    transform: rotate(15deg);
 }
